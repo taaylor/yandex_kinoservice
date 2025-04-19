@@ -9,7 +9,7 @@ docker compose exec postgres psql -U postgres -d pg_db
 Вывод должен быть:
 ```
               List of relations
- Schema |      Name       | Type  |  Owner   
+ Schema |      Name       | Type  |  Owner
 --------+-----------------+-------+----------
  public | alembic_version | table | postgres
  public | example         | table | postgres

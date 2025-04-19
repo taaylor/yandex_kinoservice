@@ -8,7 +8,7 @@ pre-commit run --all-files  # запуск линтера (прекоммита)
 
 pre-commit clean  # чистит кеш (правила проверки кода)
 
-удаляет все папки __pycache__/ в директории src, чтобы не раздражали :) : `find src -type d -name "__pycache__" -exec rm -rf {} +`
+удаляет все папки __pycache__/ в директории src, чтобы не раздражали :) : `find . -type d -name "__pycache__" -exec rm -r {} +`
 
 ## Выгрузка данных с Elasticsearch
 

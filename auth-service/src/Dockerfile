@@ -1,4 +1,3 @@
-
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y curl build-essential netcat-openbsd \
@@ -14,12 +13,12 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
 
 ENV PATH="/root/.local/bin:${PATH}"
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml poetry.lock .env ./
 
 RUN poetry install --only main
 
-COPY src/ /opt/app/
+COPY auth-service/src/ ./.
 
-RUN chmod +x /opt/app/entrypoint.sh
+RUN chmod +x entrypoint.sh
 
-CMD ["/opt/app/entrypoint.sh"]
+CMD ["./entrypoint.sh"]

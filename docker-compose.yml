@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-
   redis:
     image: redis:7-alpine
     container_name: redis-container
@@ -40,10 +37,10 @@ services:
       retries: 5
     restart: always
 
-  theatre-api:
+  auth-api:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./auth-service/src/Dockerfile
     depends_on:
       redis:
         condition: service_healthy
@@ -54,7 +51,7 @@ services:
     restart: always
 
   postgres:
-    image: postgres:14
+    image: postgres:17-alpine
     container_name: postgres-container
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -72,15 +69,16 @@ services:
     restart: always
 
   # nginx:
-    # image: nginx:latest
-    # volumes:
-    #   - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    #   - ./configs:/etc/nginx/conf.d:ro
-    # depends_on:
-    #   - theatre-api
-    # ports:
-    #   - "${NGINX_PORT}:${NGINX_PORT}"
-    # restart: always
+  #   image: nginx:1.27-alpine
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/configs/site.conf:/etc/nginx/conf.d:ro
+  #   depends_on:
+  #     - theatre-api
+  #     - auth-api
+  #   ports:
+  #     - "${NGINX_PORT}:${NGINX_PORT}"
+  #   restart: always
 
 volumes:
   redis_data:
