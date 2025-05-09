@@ -1,5 +1,3 @@
-"""JWT authentication utilities for microservices."""
-
 from .auth_decorators import access_permissions_check
 from .auth_utils_config import Permissions
 from .check_auth import LibAuthJWT, LibAuthJWTBearer, auth_dep, get_config

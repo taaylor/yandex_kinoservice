@@ -68,7 +68,7 @@ class LibAuthJWTBearer(AuthJWTBearer):
 @LibAuthJWT.load_config
 def get_config():
     settings = JWTSettings()
-    logger.info(f"Конфигурация JWT библиотеки: {settings.model_dump_json()}")
+    logger.info(f"Конфигурация JWT библиотеки: {settings.model_dump_json(indent=4)}")
     return settings
 
 

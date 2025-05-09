@@ -39,11 +39,12 @@ class Redis(BaseModel):
 
 
 class AppConfig(BaseSettings):
-    project_name: str = "movies"
+    project_name: str = "async-service"
     base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     docs_url: str = "/async/openapi"
     openapi_url: str = "/async/openapi.json"
     cache_expire_in_seconds: int = 300
+    tracing: bool = False  # включение/выключение трассировки
 
     elastic: Elastic = Elastic()
     redis: Redis = Redis()
@@ -64,7 +65,7 @@ def _get_config() -> AppConfig:
 
     app_config = AppConfig()
     logger.info(ENV_FILE)
-    logger.info(f"app_config.initialized: {app_config.model_dump_json()}")
+    logger.info(f"app_config.initialized: {app_config.model_dump_json(indent=4)}")
     return app_config
 
 

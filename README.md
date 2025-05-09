@@ -42,6 +42,14 @@
 
 [Описание API](http://localhost/async/openapi)
 
+### 📈 Jaeger
+В проекте присутствует Jaeger для трассировки запросов.
+Его UI доступен по [ссылке](http://localhost:16686/search).
+
+### 📊 Kibana
+Для визуализации данных из Elasticsearch используется Kibana.
+Ее интерфейс доступен по [ссылке](http://localhost:5601).
+
 ---
 
 ## 📂 Структура проекта
@@ -176,15 +184,11 @@ yandex_kinoservice/
 
 **Запуск тестов async-api:**
 ```bash
-docker-compose -f docker-compose-tests.yml --profile async-api-test up --build -d
-docker-compose -f docker-compose-tests.yml  logs -f tests-async-api
-docker-compose -f docker-compose-tests.yml --profile async-api-test  down -v
+docker-compose -f docker-compose-tests.yml --profile async-api-test up --build -d && docker-compose -f docker-compose-tests.yml  logs -f tests-async-api && docker-compose -f docker-compose-tests.yml --profile async-api-test  down -v
 ```
 **Запуск тестов auth-api**
 ```bash
-docker-compose -f docker-compose-tests.yml --profile auth-api-test up --build -d
-docker-compose -f docker-compose-tests.yml logs -f tests-auth-api
-docker-compose -f docker-compose-tests.yml --profile auth-api-test  down -v
+docker-compose -f docker-compose-tests.yml --profile auth-api-test up --build -d && docker-compose -f docker-compose-tests.yml logs -f tests-auth-api && docker-compose -f docker-compose-tests.yml --profile auth-api-test  down -v
 ```
 ---
 ### Остановка и удаление контейнеров

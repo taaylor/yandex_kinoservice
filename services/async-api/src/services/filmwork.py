@@ -13,6 +13,7 @@ from db.database import PaginateBaseDB
 from db.elastic import get_paginate_repository
 from fastapi import Depends, HTTPException, status
 from models.schemas_logic import FilmLogic
+from tracer_utils import traced
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +204,7 @@ class FilmService:
             )
         return film_dto
 
+    @traced("get_list_film_process")
     async def get_list_film(
         self,
         sort: FilmSorted,

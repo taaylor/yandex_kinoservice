@@ -57,7 +57,7 @@ class AuthUtilsConfig(BaseSettings):
 
 def _get_config() -> AuthUtilsConfig:
     app_config = AuthUtilsConfig()
-    logger.info(f"auth_utils_conf.initialized: {app_config.model_dump_json()}")
+    logger.info(f"auth_utils_conf.initialized: {app_config.model_dump_json(indent=4)}")
     return app_config
 
 

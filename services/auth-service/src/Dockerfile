@@ -15,9 +15,12 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 COPY services/auth-service/src/pyproject.toml services/auth-service/src/poetry.lock ./
 
-# Копируем auth_utils и собираем на месте
+# Копируем libs и собираем на месте
 COPY libs/auth_utils /opt/app/libs/auth_utils
 RUN cd /opt/app/libs/auth_utils && poetry build && cd /opt/app && poetry add libs/auth_utils
+
+COPY libs/tracer_utils /opt/app/libs/tracer_utils
+RUN cd /opt/app/libs/tracer_utils && poetry build && cd /opt/app && poetry add libs/tracer_utils
 
 RUN poetry install --only main
 

@@ -4,6 +4,8 @@ from api.v1.person import persons
 from core.config import app_config
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from tracer_utils import init_tracer, request_id_middleware
 from utils import exceptions_handlers
 from utils.connectors import lifespan
 
@@ -24,6 +26,14 @@ app = FastAPI(
 
 # Подключение обработчиков
 exceptions_handlers.setup_exception_handlers(app)
+
+if app_config.tracing:
+    # Добавляем middleware
+    app.middleware("http")(request_id_middleware)
+    # Инициализация трейсера
+    init_tracer(app, app_config.project_name)
+    # Добавлене инструментария FastAPI для трейсов
+    FastAPIInstrumentor.instrument_app(app)
 
 # Секция подключения роутеров к серверу
 SERVICE_PATH = "/async/api/v1/"
