@@ -1,0 +1,21 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./conf_clickhouse/config.xml:/etc/clickhouse-server/config.d/config.xml:ro
+      - ./conf_clickhouse/users.xml:/etc/clickhouse-server/config.d/users.xml:ro
+      - clickhouse-data:/var/lib/clickhouse
+
+  vertica:
+    image: jbfavre/vertica:latest
+    ports:
+      - "5433:5433"
+    volumes:
+      - vertica-data:/home/dbadmin/db
+
+volumes:
+  clickhouse-data:
+  vertica-data:
