@@ -24,15 +24,16 @@ logger = get_logger(__name__)
 
 load_dotenv(find_dotenv())
 
-CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST")
+CLICKHOUSE_HOST = os.getenv("CLK_HOST")
+PASSWORD = os.getenv("CLK_DEFAULT_PASSWORD")
 TABLE_NAME = "metrics"
-TABLE_NAME_DIST = "metrics_distributed"
+TABLE_NAME_DIST = "metrics_dst"
 DB_NAME = "kinoservice"
 CLUSTER_NAME = "kinoservice_cluster"
 
 
 def main():
-    client = Client(CLICKHOUSE_HOST)
+    client = Client(CLICKHOUSE_HOST, user="default", password=PASSWORD)
 
     # Создание базы данных
     client.execute(
@@ -66,7 +67,7 @@ def main():
             '{replica}'
         )
         PARTITION BY toYYYYMMDD(event_timestamp)
-        ORDER BY (event_timestamp, id, event_type)
+        ORDER BY event_timestamp
         TTL event_timestamp + INTERVAL 360 DAY
         SETTINGS index_granularity = 8192
     """.format(
