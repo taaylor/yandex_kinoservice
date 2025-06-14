@@ -1,5 +1,6 @@
 include:
   - ./infra/kafka/docker-compose.kafka.yaml
+  - ./infra/elk/docker-compose.elk.yml
   - ./infra/clickhouse/docker-compose.clickhouse.yml
   - ./services/metric-service/docker-compose.metric-services.yml
   - ./services/content-actions-service/docker-compose.content-actions.yml
@@ -214,7 +215,7 @@ services:
       - auth-api
       - admin-panel
       - content-actions-api
-      - metric-api
+      # - metric-api
     ports:
       - "${NGINX_PORT}:${NGINX_PORT}"
     restart: always

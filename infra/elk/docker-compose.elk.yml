@@ -1,0 +1,84 @@
+services:
+  logstash:
+    image: logstash:9.0.2
+    container_name: logstash
+    env_file:
+      - ../../.env
+    cpus: "2"
+    mem_limit: 1024M
+    depends_on:
+      elasticsearch-logs:
+        condition: service_healthy
+    environment:
+      ES_HOST: "${ELASTIC_LOGS_HOST}:${ELASTIC_PORT}"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "5044"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    volumes:
+      - ./config/logstash.conf:/config/logstash.conf:ro
+    command: logstash -f /config/logstash.conf
+
+  elasticsearch-logs:
+    image: elasticsearch:9.0.2
+    container_name: elasticsearch-logs
+    env_file:
+      - ../../.env
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    cpus: "2"
+    mem_limit: 1024M
+    command: bin/elasticsearch
+    expose:
+      - "${ELASTIC_LOGS_EXTERNAL_PORT}:${ELASTIC_LOGS_PORT}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    volumes:
+      - elasticsearch_logs:/usr/share/elasticsearch/data
+
+  kibana-logs:
+    image: kibana:9.0.2
+    container_name: kibana-logs
+    env_file:
+      - ../../.env
+    environment:
+      - ELASTICSEARCH_HOSTS="http://${ELASTIC_LOGS_HOST}:${ELASTIC_LOGS_PORT}"
+      - ELASTICSEARCH_SECURITY_ENABLED=false
+    cpus: "2"
+    mem_limit: 1024M
+    depends_on:
+      elasticsearch-logs:
+        condition: service_healthy
+    ports:
+      - "${KIBANA_LOGS_EXTERNAL_PORT}:5601"
+    restart: always
+
+  filebeat:
+    image: elastic/filebeat:9.0.2
+    container_name: filebeat-logs
+    env_file:
+      - ../../.env
+    cpus: "2"
+    mem_limit: 1024M
+    user: root
+    volumes:
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: filebeat -e --strict.perms=false
+    depends_on:
+      elasticsearch-logs:
+        condition: service_healthy
+      logstash:
+        condition: service_started
+
+volumes:
+  elasticsearch_logs:
