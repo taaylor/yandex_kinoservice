@@ -1,0 +1,163 @@
+
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres-container-research
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "pg_db"
+    volumes:
+      - research_pg_data:/var/lib/postgresql/data
+      - ./init_postgres/database_init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+
+  mongodb_sh1:
+    image: mongo:8.0.10
+    container_name: mongodb_sh1
+    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - research_mongodb_data1:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  mongodb_sh2:
+    image: mongo:8.0.10
+    container_name: mongodb_sh2
+    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - research_mongodb_data2:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  mongodb_cfg1:
+    container_name: mongodb_cfg1
+    image: mongo:8.0.10
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - research_mongodb_config1:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  mongodb_cfg2:
+    container_name: mongodb_cfg2
+    image: mongo:8.0.10
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - research_mongodb_config2:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  mongodb_cfg3:
+    container_name: mongodb_cfg3
+    image: mongo:8.0.10
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - research_mongodb_config3:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+
+  # секция роутера
+  mongodb_router:
+    image: mongo:8.0.10
+    container_name: mongodb_router
+    command: mongos --configdb mongors1conf/mongodb_cfg1:27017,mongodb_cfg2:27017,mongodb_cfg3:27017 --port 27017 --bind_ip_all
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
+    depends_on:
+      mongodb_cfg1:
+        condition: service_healthy
+      mongodb_cfg2:
+        condition: service_healthy
+      mongodb_cfg3:
+        condition: service_healthy
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+
+  mongodb_init:
+    build:
+      context: .
+      dockerfile: ./init_mongodb/Dockerfile
+    container_name: mongodb_init
+    environment:
+      DB_NAME: "kinoservice"
+      REVIEW_COLL: "reviewCollection"
+      BOOKMARK_COLL: "bookmarkCollection"
+      REVIEWS_COLL: "reviewsCollection"
+    depends_on:
+      mongodb_sh1:
+        condition: service_healthy
+      mongodb_sh2:
+        condition: service_healthy
+      mongodb_cfg1:
+        condition: service_healthy
+      mongodb_cfg2:
+        condition: service_healthy
+      mongodb_cfg3:
+        condition: service_healthy
+
+  # init_research:
+  #   build:
+  #     context: .
+  #     dockerfile: ./research/Dockerfile
+  #   # env_file:
+  #   #   - ../../.env
+  #   # ports:
+  #   #   - 8099:8000
+  #   cpus: "1"
+  #   mem_limit: 256M
+  #   depends_on:
+  #     mongodb_init:
+  #       condition: service_completed_successfully
+  #     postgres:
+  #       condition: service_healthy
+  #   restart: always
+
+volumes:
+  research_mongodb_data1:
+  research_mongodb_data2:
+  research_mongodb_config1:
+  research_mongodb_config2:
+  research_mongodb_config3:
+  research_pg_data:
