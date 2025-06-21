@@ -1,84 +1,123 @@
 services:
-  logstash:
-    image: logstash:9.0.2
-    container_name: logstash
-    env_file:
-      - ../../.env
-    cpus: "2"
-    mem_limit: 1024M
-    depends_on:
-      elasticsearch-logs:
-        condition: service_healthy
-    environment:
-      ES_HOST: "${ELASTIC_LOGS_HOST}:${ELASTIC_PORT}"
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "5044"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: always
-    volumes:
-      - ./config/logstash.conf:/config/logstash.conf:ro
-    command: logstash -f /config/logstash.conf
-
   elasticsearch-logs:
-    image: elasticsearch:9.0.2
     container_name: elasticsearch-logs
+    image: elasticsearch:9.0.2
     env_file:
       - ../../.env
     environment:
       - "discovery.type=single-node"
       - "xpack.security.enabled=false"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    cpus: "2"
-    mem_limit: 1024M
     command: bin/elasticsearch
     expose:
       - "${ELASTIC_LOGS_EXTERNAL_PORT}:${ELASTIC_LOGS_PORT}"
+    volumes:
+      - elasticsearch_logs:/usr/share/elasticsearch/data
+    cpus: "2"
+    mem_limit: 1024M
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9200"]
       interval: 10s
       timeout: 5s
       retries: 5
     restart: always
-    volumes:
-      - elasticsearch_logs:/usr/share/elasticsearch/data
 
   kibana-logs:
-    image: kibana:9.0.2
     container_name: kibana-logs
+    image: kibana:9.0.2
     env_file:
       - ../../.env
     environment:
       - ELASTICSEARCH_HOSTS="http://${ELASTIC_LOGS_HOST}:${ELASTIC_LOGS_PORT}"
       - ELASTICSEARCH_SECURITY_ENABLED=false
+    ports:
+      - "${KIBANA_LOGS_EXTERNAL_PORT}:5601"
     cpus: "2"
     mem_limit: 1024M
     depends_on:
       elasticsearch-logs:
         condition: service_healthy
-    ports:
-      - "${KIBANA_LOGS_EXTERNAL_PORT}:5601"
+      es-init-template:
+        condition: service_completed_successfully
+    restart: always
+
+  logstash:
+    container_name: logstash
+    image: logstash:9.0.2
+    env_file:
+      - ../../.env
+    environment:
+      ES_HOST: "${ELASTIC_LOGS_HOST}:${ELASTIC_PORT}"
+    command: logstash -f /config/logstash.conf
+    volumes:
+      - ./config/logstash.conf:/config/logstash.conf:ro
+    cpus: "2"
+    mem_limit: 1024M
+    depends_on:
+      elasticsearch-logs:
+        condition: service_healthy
+      es-init-template:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-XGET", "localhost:9600/?pretty"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   filebeat:
-    image: elastic/filebeat:9.0.2
     container_name: filebeat-logs
+    image: elastic/filebeat:9.0.2
     env_file:
       - ../../.env
-    cpus: "2"
-    mem_limit: 1024M
     user: root
+    command: filebeat -e --strict.perms=false
     volumes:
       - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: filebeat -e --strict.perms=false
+    cpus: "2"
+    mem_limit: 1024M
     depends_on:
       elasticsearch-logs:
         condition: service_healthy
       logstash:
-        condition: service_started
+        condition: service_healthy
+      es-init-template:
+        condition: service_completed_successfully
+    restart: always
+
+  es-init-template: #Создаёт шаблон в Elasticsearch для индексов с логами, со специальным режимом индекса Data Stream + LogsDB. Это круто в современных версиях ES.
+    container_name: es-init-template
+    image: curlimages/curl:8.7.1
+    entrypoint: >
+      sh -c "
+        echo 'Запуск инициализации шаблона индексов Elasticsearch...';
+        until curl -s http://${ELASTIC_LOGS_HOST}:${ELASTIC_LOGS_PORT} >/dev/null; do
+          echo 'Ожидание доступности Elasticsearch...';
+          sleep 2;
+        done;
+        echo 'Elasticsearch доступен. Создание шаблона индексов...';
+        RESPONSE=$$(curl -w '%{http_code}' -s -X PUT http://${ELASTIC_LOGS_HOST}:${ELASTIC_LOGS_PORT}/_index_template/logs-datastream-template -H 'Content-Type: application/json' -d '{\"index_patterns\": [\"logs-*\"], \"data_stream\": {}, \"priority\": 500, \"template\": { \"settings\": { \"index.mode\": \"logsdb\", \"number_of_shards\": 1 }, \"mappings\": { \"properties\": { \"@timestamp\": { \"type\": \"date\" } } } } }');
+        HTTP_CODE=$$(echo $$RESPONSE | tail -c 4);
+        BODY=$$(echo $$RESPONSE | head -c -4);
+        echo 'HTTP код ответа:' $$HTTP_CODE;
+        echo 'Тело ответа:' $$BODY;
+        if [ $$HTTP_CODE -eq 200 ] || [ $$HTTP_CODE -eq 201 ]; then
+          echo 'Шаблон индексов успешно создан!';
+          curl -s http://${ELASTIC_LOGS_HOST}:${ELASTIC_LOGS_PORT}/_index_template/logs-datastream-template | head -c 200;
+          echo '';
+          echo 'Проверка шаблона завершена.';
+        else
+          echo 'Ошибка создания шаблона индексов. HTTP код:' $$HTTP_CODE;
+          echo 'Ответ:' $$BODY;
+          exit 1;
+        fi
+      "
+    depends_on:
+      elasticsearch-logs:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   elasticsearch_logs:

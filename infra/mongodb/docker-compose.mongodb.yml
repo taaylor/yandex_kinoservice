@@ -4,45 +4,45 @@ services:
   mongodb_sh1_rep1:
     image: mongo:8.0.10
     container_name: mongodb_sh1_rep1
-    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017
+    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_data1:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
   mongodb_sh1_rep2:
     image: mongo:8.0.10
     container_name: mongodb_sh1_rep2
-    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017
+    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_data2:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
   mongodb_sh1_rep3:
     image: mongo:8.0.10
     container_name: mongodb_sh1_rep3
-    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017
+    command: mongod --shardsvr --replSet mongoshard1 --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_data3:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
@@ -51,45 +51,45 @@ services:
   mongodb_sh2_rep1:
     image: mongo:8.0.10
     container_name: mongodb_sh2_rep1
-    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017
+    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_data4:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
   mongodb_sh2_rep2:
     image: mongo:8.0.10
     container_name: mongodb_sh2_rep2
-    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017
+    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_data5:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
   mongodb_sh2_rep3:
     image: mongo:8.0.10
     container_name: mongodb_sh2_rep3
-    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017
+    command: mongod --shardsvr --replSet mongoshard2 --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_data6:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
@@ -97,45 +97,45 @@ services:
   mongodb_cfg1:
     container_name: mongodb_cfg1
     image: mongo:8.0.10
-    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_config1:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
   mongodb_cfg2:
     container_name: mongodb_cfg2
     image: mongo:8.0.10
-    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_config2:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
   mongodb_cfg3:
     container_name: mongodb_cfg3
     image: mongo:8.0.10
-    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017 --quiet --logpath /dev/null
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - mongodb_config3:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 15s
       timeout: 30s
       retries: 3
 
@@ -143,7 +143,7 @@ services:
   mongodb_router:
     image: mongo:8.0.10
     container_name: mongodb_router
-    command: mongos --configdb mongors1conf/mongodb_cfg1:27017,mongodb_cfg2:27017,mongodb_cfg3:27017 --port 27017 --bind_ip_all
+    command: mongos --configdb mongors1conf/mongodb_cfg1:27017,mongodb_cfg2:27017,mongodb_cfg3:27017 --port 27017 --bind_ip_all --quiet
     ports:
       - 27017:27017
     expose:

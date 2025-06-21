@@ -1,9 +1,12 @@
 services:
   kafka-0:
+    container_name: kafka-0
     image: bitnami/kafka:3.4
     profiles: ["metrics-api-test", "production"]
     ports:
       - "9094:9094"
+    volumes:
+      - kafka_0_data:/bitnami/kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
@@ -16,20 +19,21 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-0:9092,EXTERNAL://127.0.0.1:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
     healthcheck:
-        test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
+      test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
-    volumes:
-      - kafka_0_data:/bitnami/kafka
 
 
   kafka-1:
+    container_name: kafka-1
     image: bitnami/kafka:3.4
     profiles: ["metrics-api-test", "production"]
     ports:
       - "9095:9095"
+    volumes:
+      - kafka_1_data:/bitnami/kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - ALLOW_PLAINTEXT_LISTENER=yes
@@ -42,20 +46,21 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9092,EXTERNAL://127.0.0.1:9095
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
     healthcheck:
-        test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
+      test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
-    volumes:
-      - kafka_1_data:/bitnami/kafka
 
 
   kafka-2:
+    container_name: kafka-2
     image: bitnami/kafka:3.4
     profiles: ["metrics-api-test", "production"]
     ports:
       - "9096:9096"
+    volumes:
+      - kafka_2_data:/bitnami/kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - ALLOW_PLAINTEXT_LISTENER=yes
@@ -68,16 +73,15 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-2:9092,EXTERNAL://127.0.0.1:9096
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
     healthcheck:
-        test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
+      test: ["CMD", "/opt/bitnami/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
-    volumes:
-      - kafka_2_data:/bitnami/kafka
 
 
   kafka-init:
+    container_name: kafka-init
     image: bitnami/kafka:3.4
     profiles: ["metrics-api-test", "production"]
     env_file:
@@ -101,6 +105,7 @@ services:
 
 
   ui:
+    container_name: kafka-ui
     image: provectuslabs/kafka-ui:v0.7.0
     profiles: ["metrics-api-test", "production"]
     ports:
@@ -108,6 +113,7 @@ services:
     environment:
       - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka-0:9092
       - KAFKA_CLUSTERS_0_NAME=kraft
+    restart: always
 
 
 volumes:

@@ -8,29 +8,29 @@ include:
 
 services:
   elasticsearch:
-    image: elasticsearch:8.16.5
     container_name: elasticsearch-container
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+    image: elasticsearch:8.16.5
     environment:
       - "discovery.type=single-node"
       - "xpack.security.enabled=false"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    cpus: "2"         # Прямое ограничение CPU
-    mem_limit: 1024M   # Прямое ограничение памяти
     command: bin/elasticsearch
     expose:
       - ${ELASTIC_PORT}
-    restart: always
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    cpus: "2"
+    mem_limit: 1024M
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9200"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
   jaeger:
-    image: jaegertracing/all-in-one:1.68.0
     container_name: jaeger-container
+    image: jaegertracing/all-in-one:1.68.0
     environment:
       - COLLECTOR_ZIPKIN_HOST_PORT=:9411
       - COLLECTOR_OTLP_ENABLED=true
@@ -47,18 +47,18 @@ services:
     restart: always
 
   kibana:
-    image: kibana:8.16.5
     container_name: kibana-container
+    image: kibana:8.16.5
     environment:
       - ELASTICSEARCH_HOSTS="http://${ELASTIC_HOST}:${ELASTIC_PORT}"
       - ELASTICSEARCH_SECURITY_ENABLED=false
-    cpus: "2"         # Прямое ограничение CPU
-    mem_limit: 1024M   # Прямое ограничение памяти
+    ports:
+      - "${KIBANA_PORT}:${KIBANA_PORT}"
+    cpus: "2"
+    mem_limit: 1024M
     depends_on:
       elasticsearch:
         condition: service_healthy
-    ports:
-      - "${KIBANA_PORT}:${KIBANA_PORT}"
     restart: always
 
   es-init:
@@ -66,17 +66,17 @@ services:
     build:
       context: .
       dockerfile: backup/elastic_dump/dump_loader/Dockerfile
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     environment:
       - ELASTIC_HOST=${ELASTIC_HOST}
       - ELASTIC_PORT=${ELASTIC_PORT}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     restart: "no"
 
   redis:
-    image: redis:7-alpine
     container_name: redis-container
+    image: redis:7-alpine
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_USER=${REDIS_USER}
@@ -84,16 +84,6 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_DB=${REDIS_DB}
-    volumes:
-      - redis_data:/data
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
     command: >
       sh -c '
         mkdir -p /usr/local/etc/redis &&
@@ -105,6 +95,16 @@ services:
         echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
         redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
       '
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
       interval: 30s
@@ -113,21 +113,20 @@ services:
     restart: always
 
   auth-api:
+    container_name: auth-api
     build:
       context: .
       dockerfile: ./services/auth-service/src/Dockerfile
     env_file:
       - ./.env
-    cpus: "1"
-    mem_limit: 256M
+    environment: []
     depends_on:
       redis:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    restart: always
-    ports:
-      - 8000:8000
+    cpus: "1"
+    mem_limit: 256M
     healthcheck:
       test: [
         "CMD-SHELL",
@@ -137,30 +136,33 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
+    restart: always
 
   async-api:
+    container_name: async-api
     build:
       context: .
       dockerfile: ./services/async-api/src/Dockerfile
     env_file:
       - ./.env
-    cpus: "1"
-    mem_limit: 256M
+    environment: []
     depends_on:
       elasticsearch:
         condition: service_healthy
       redis:
         condition: service_healthy
+    cpus: "1"
+    mem_limit: 256M
     restart: always
 
   content-actions-api:
+    container_name: content-actions-api
     build:
       context: .
       dockerfile: ./services/content-actions-service/src/Dockerfile
     env_file:
       - ./.env
-    cpus: "1"
-    mem_limit: 256M
+    environment: []
     depends_on:
       mongodb_init:
         condition: service_completed_successfully
@@ -168,14 +170,18 @@ services:
         condition: service_healthy
       async-api:
         condition: service_started
+    cpus: "1"
+    mem_limit: 256M
     restart: always
 
   admin-panel:
+    container_name: admin-panel
     build:
       context: .
       dockerfile: ./services/admin-panel/src/Dockerfile
     env_file:
       - ./.env
+    environment: []
     volumes:
       - static_django:/var/www/static
     depends_on:
@@ -185,11 +191,11 @@ services:
         condition: service_healthy
       auth-api:
         condition: service_healthy
-
+    restart: always
 
   postgres:
-    image: postgres:17-alpine
     container_name: postgres-container
+    image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -205,6 +211,7 @@ services:
     restart: always
 
   pg-import:
+    container_name: pg-import
     build:
       context: .
       dockerfile: ./backup/postgres_dump-auth/Dockerfile
@@ -219,10 +226,13 @@ services:
         condition: service_healthy
       auth-api:
         condition: service_healthy
+    restart: "no"
 
   nginx:
+    container_name: nginx
     image: nginx:1.27.5-alpine
     env_file: .env
+    environment: []
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/configs:/etc/nginx/conf.d:ro

@@ -1,11 +1,12 @@
 services:
   metric-api:
+    container_name: metric-api
     build:
       context: .
       dockerfile: ./metric-api/src/Dockerfile
-    profiles: ["metrics-api-test", "production"]
     env_file:
       - ../../.env
+    environment: []
     ports:
       - "8000:8000"
     depends_on:
@@ -19,17 +20,20 @@ services:
       timeout: 5s
       retries: 5
     restart: always
+    profiles: ["metrics-api-test", "production"]
 
   etl:
+    container_name: etl
     build:
       context: .
       dockerfile: ./etl/Dockerfile
-    profiles: ["metrics-api-test", "production"]
     env_file:
       - ../../.env
+    environment: []
     depends_on:
       init_clickhouse:
         condition: service_completed_successfully
       kafka-init:
         condition: service_started
     restart: always
+    profiles: ["metrics-api-test", "production"]
