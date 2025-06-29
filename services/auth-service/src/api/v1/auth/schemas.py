@@ -2,12 +2,30 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+import pytz
+from fastapi import HTTPException, status
+from pydantic import BaseModel, Field, field_validator
 
 
 class Gender(StrEnum):
     MALE = "MALE"
     FEMALE = "FEMALE"
+
+
+class ProfileSettingsFields(BaseModel):
+    is_notification_email: bool = Field(
+        default=True, description="Разрешить отправку рассылок на почту"
+    )
+    user_timezone: str = Field(default="Europe/Moscow", description="Таймзона пользователя")
+
+    @field_validator("user_timezone")
+    @classmethod
+    def validate_timezone(cls, value: str):
+        if value not in pytz.all_timezones:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Неверный формат таймзоны {value}"
+            )
+        return value
 
 
 class AccessTokenField(BaseModel):
@@ -60,7 +78,7 @@ class UserFields(BaseModel):
     gender: Gender = Field(..., description="Пол пользователя")
 
 
-class RegisterRequest(UserFields):
+class RegisterRequest(ProfileSettingsFields, UserFields):
     password: str = Field(
         ...,
         min_length=8,
@@ -69,9 +87,10 @@ class RegisterRequest(UserFields):
     )
 
 
-class RegisterResponse(UserFields):
+class RegisterResponse(ProfileSettingsFields, UserFields):
     user_id: UUID = Field(..., description="Уникальный идентификатор пользователя")
     session: Session = Field(..., description="Сессия пользователя")
+    is_verification_email: bool = Field(..., description="Статус подтверждения почты")
 
 
 class LoginRequest(BaseModel):

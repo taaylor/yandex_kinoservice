@@ -25,7 +25,7 @@ from db.cache import Cache, get_cache
 from db.postgres import get_session
 from fastapi import Depends, HTTPException, status
 from models.logic_models import OAuthUserInfo, SessionUserData
-from models.models import SocialAccount, User, UserCred
+from models.models import SocialAccount, User, UserCred, UserProfileSettings
 from models.models_types import ProvidersEnum
 from services.auth_repository import AuthRepository, get_auth_repository
 from services.base_service import BaseAuthService, MixinAuthRepository
@@ -100,6 +100,11 @@ class RegisterService(BaseAuthService):
             session=self.session,
             role_code=user.role_code,
         )
+        user_settings = UserProfileSettings(
+            user_id=user.id,
+            user_timezone=user_data.user_timezone,
+            is_notification_email=user_data.is_notification_email,
+        )
         logger.debug(
             f"Для пользователя {user.username=} с ролью: {user.role_code}, получены разрешения: {user_permissions=}",  # noqa: E501
         )
@@ -126,6 +131,7 @@ class RegisterService(BaseAuthService):
             user_cred=user_cred,
             user_session=user_session,
             user_session_hist=user_session_hist,
+            user_settings=user_settings,
         )
 
         logger.info(f"Создан пользователь: {user.id=}, {user.username=}")
@@ -140,6 +146,9 @@ class RegisterService(BaseAuthService):
             last_name=user.last_name,
             gender=user.gender,
             session=user_tokens,
+            is_notification_email=user_settings.is_notification_email,
+            user_timezone=user_settings.user_timezone,
+            is_verification_email=user_settings.is_verification_email,
         )
 
 

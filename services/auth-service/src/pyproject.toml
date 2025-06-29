@@ -19,7 +19,8 @@ dependencies = [
     "psycopg2>=2.9.10,<3.0.0",
     "async-fastapi-jwt-auth[asymmetric]>=0.6.6,<1.0.0",
     "gunicorn>=23.0.0,<24.0.0",
-    "aiohttp (>=3.11.18,<4.0.0)"
+    "aiohttp (>=3.11.18,<4.0.0)",
+    "pytz (>=2025.2,<2026.0)"
 ]
 
 [project.optional-dependencies]

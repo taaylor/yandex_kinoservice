@@ -9,6 +9,7 @@ from models.models import (
     SocialAccount,
     User,
     UserCred,
+    UserProfileSettings,
     UserSession,
     UserSessionsHist,
 )
@@ -92,8 +93,9 @@ class AuthRepository:
         user_cred: UserCred,
         user_session: UserSession,
         user_session_hist: UserSessionsHist,
+        user_settings: UserProfileSettings,
     ):
-        session.add_all([user, user_cred, user_session, user_session_hist])
+        session.add_all([user, user_cred, user_session, user_session_hist, user_settings])
 
     @traced()
     @sqlalchemy_universal_decorator

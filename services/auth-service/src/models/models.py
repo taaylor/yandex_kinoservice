@@ -41,6 +41,13 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
+    user_settings: Mapped["UserProfileSettings"] = relationship(
+        "UserProfileSettings",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return f"<{self.__class__.__name__}(id={self.id}, username={self.username})>"
 
@@ -205,3 +212,34 @@ class UserSessionsHist(Base):
         nullable=False,
         comment="Дата истечения сессии",
     )
+
+
+class UserProfileSettings(Base):
+    __tablename__ = "profile_settings"
+    __table_args__ = {"schema": "profile"}
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("profile.user.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    is_verification_email: Mapped[bool] = mapped_column(
+        default=False, server_default=text("'false'"), comment="Подтвеждение email"
+    )
+    user_timezone: Mapped[str] = mapped_column(String(50), default="UTC")
+    is_notification_email: Mapped[bool] = mapped_column(
+        default=True,
+        server_default=text("'true'"),
+        comment="Разрешить отправку уведомлений на почту да/нет",
+    )
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="user_settings",
+        uselist=False,
+    )
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(user_id={self.user_id})>"
+
+    def __str__(self):
+        return f"Модель: {self.__class__.__name__}(user_id={self.user_id})"

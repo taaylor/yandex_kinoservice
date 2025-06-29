@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from core.config import app_config
 from db.postgres import Base
+from models import models
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -51,6 +52,7 @@ def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
+        include_schemas=True,
         # изменяем наименование таблицы для хранения миграций чтобы не было конфликтов с auth-api
         version_table="alembic_version_notifi_service",
     )
