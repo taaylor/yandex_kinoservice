@@ -1,0 +1,37 @@
+.
+├── docker-compose.event-generator.yml
+├── src
+│   ├── api
+│   │   ├── __init__.py
+│   │   └── v1
+│   │       └── __init__.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── gunicorn_conf.py
+│   │   └── logger_config.py
+│   ├── db
+│   │   ├── __init__.py
+│   │   └── cache.py
+│   ├── Dockerfile
+│   ├── Dockerfile.debug
+│   ├── main.py
+│   ├── models
+│   │   └── __init__.py
+│   ├── poetry.lock
+│   ├── pyproject.toml
+│   ├── scripts
+│   │   ├── entrypoint_debug.sh
+│   │   ├── entrypoint.sh
+│   │   └── run_celery.sh
+│   ├── services
+│   │   └── __init__.py
+│   ├── tasks
+│   │   ├── __init__.py
+│   │   ├── celery_config.py
+│   │   └── scheduled.py
+│   └── utils
+│       ├── __init__.py
+│       ├── connectors.py
+│       ├── decorators.py
+│       └── exceptions_handlers.py

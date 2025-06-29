@@ -1,0 +1,105 @@
+
+services:
+
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-container
+  #   environment:
+  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
+  #     - REDIS_USER=${REDIS_USER}
+  #     - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+  #     - REDIS_HOST=${REDIS_HOST}
+  #     - REDIS_PORT=${REDIS_PORT}
+  #     - REDIS_DB=${REDIS_DB}
+  #   volumes:
+  #     - redis_data:/data
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 512M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 256M
+  #     # sh -c '
+  #     #   mkdir -p /usr/local/etc/redis &&
+  #     #   echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+  #     #   echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+  #     #   echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+  #     #   echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+  #     #   echo "user default off" > /usr/local/etc/redis/users.acl &&
+  #     #   echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+  #     #   redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+  #     # '
+  #   command: >
+  #     sh -c '
+  #       mkdir -p /usr/local/etc/redis &&
+  #       echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+  #       echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+  #       echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+  #       echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+  #       echo "user default off" > /usr/local/etc/redis/users.acl &&
+  #       echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all +PUBLISH +SUBSCRIBE +PSUBSCRIBE +UNSUBSCRIBE" >> /usr/local/etc/redis/users.acl &&
+  #       redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+  #     '
+
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+  #   restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-container
+    ports:
+      - "5672:5672"     # порт брокера
+      - "15672:15672"   # порт web-интерфейса
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: rabbit
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+
+  event-generator:
+    build:
+      context: ../..
+      dockerfile: services/event-generator/src/Dockerfile
+    image: event-generator:latest
+    env_file:
+      - ../../.env
+    ports:
+      - 8077:8000
+    cpus: "1"
+    mem_limit: 256M
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+    restart: always
+
+
+  celery-beat:
+    image: event-generator:latest   # <— и здесь тоже
+    # command: ["services/event-generator/src/scripts/run_celery.sh", "celery_beat"] # Второй аргумен для if/elif в скрипте
+    # command: ["/opt/app/scripts/run_celery.sh", "celery_beat"]
+    command: ["./scripts/run_celery.sh", "celery_beat"]
+    working_dir: /opt/app          # на всякий случай
+    env_file:
+      - ../../.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  # redis_data:
+  rabbitmq_data:
