@@ -21,10 +21,8 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.execute("CREATE SCHEMA IF NOT EXISTS notification")
-    op.execute("CREATE SCHEMA IF NOT EXISTS global_notification")
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     op.execute("DROP SCHEMA IF EXISTS notification")
-    op.execute("DROP SCHEMA IF EXISTS global_notification")

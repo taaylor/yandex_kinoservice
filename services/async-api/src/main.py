@@ -1,5 +1,6 @@
 from api.v1.filmwork import filmwork
 from api.v1.genre import genres
+from api.v1.internal import internal_api
 from api.v1.person import persons
 from core.config import app_config
 from fastapi import FastAPI
@@ -40,3 +41,8 @@ SERVICE_PATH = "/async/api/v1/"
 app.include_router(filmwork.router, prefix=f"{SERVICE_PATH}films", tags=["Фильмы"])
 app.include_router(persons.router, prefix=f"{SERVICE_PATH}persons", tags=["Персоны"])
 app.include_router(genres.router, prefix=f"{SERVICE_PATH}genres", tags=["Жанры"])
+app.include_router(
+    internal_api.router,
+    prefix=f"{SERVICE_PATH}internal",
+    tags=["API для межсервисного взаимодействия"],
+)

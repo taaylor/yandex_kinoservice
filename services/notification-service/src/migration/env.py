@@ -24,6 +24,14 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def include_object(object, name, type_, reflected, compare_to) -> bool:
+    # Включаем только объекты из схемы 'notification'
+    if hasattr(object, "schema"):
+        if object.schema not in {"notification"}:
+            return False
+    return True
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -42,6 +50,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -54,7 +63,8 @@ def do_run_migrations(connection: Connection) -> None:
         target_metadata=target_metadata,
         include_schemas=True,
         # изменяем наименование таблицы для хранения миграций чтобы не было конфликтов с auth-api
-        version_table="alembic_version_notifi_service",
+        version_table="alembic_version_notify_service",
+        include_object=include_object,
     )
 
     with context.begin_transaction():

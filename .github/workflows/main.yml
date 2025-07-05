@@ -26,13 +26,13 @@ jobs:
         run: |
           flake8 services/notification-service/src services/content-actions-service/src \
           --max-line-length=100 \
-          --extend-ignore=E203,W503,C812,C813,C814,C815S,C816,WPS300,WPS111,WPS431,WPS226,WPS110,WPS404,WPS601,WPS237,WPS202,WPS115,WPS201,WPS232 \
+          --extend-ignore=E203,W503,C812,C813,C814,C815S,C816,WPS300,WPS111,WPS431,WPS226,WPS110,WPS404,WPS601,WPS237,WPS202,WPS115,WPS201,WPS232,WPS432,WPS229 \
           --select=WPS \
           --exclude=services/notification-service/src/migration/*,services/notification-service/src/alembic/* \
           --format=html \
           --htmldir=flake-report
-          mypy services/content-actions-service/src --config-file=pyproject.toml --no-implicit-reexport
-          mypy services/notification-service/src --config-file=pyproject.toml --no-implicit-reexport
+          mypy services/content-actions-service/src --config-file=pyproject.toml --no-implicit-reexport --explicit-package-bases
+          mypy services/notification-service/src --config-file=pyproject.toml --no-implicit-reexport --explicit-package-bases
 
       - name: Upload flake8 report  # выгружает отчеты по flake8
         if: always()

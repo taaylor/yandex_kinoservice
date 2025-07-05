@@ -229,8 +229,8 @@ services:
         condition: service_healthy
     restart: "no"
 
-  notification-api:
-    container_name: notification-api-container
+  notification:
+    container_name: notification-container
     env_file:
       - .env
     build:

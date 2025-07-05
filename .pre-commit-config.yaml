@@ -68,7 +68,7 @@ repos:
         language_version: python3.12
         args:
           - "--max-line-length=100"
-          - "--extend-ignore=E203,W503,C812,C813,C814,C815S,C816,WPS300,WPS111,WPS431,WPS226,WPS110,WPS404,WPS601,WPS237,WPS202,WPS115,WPS201,WPS232"
+          - "--extend-ignore=E203,W503,C812,C813,C814,C815S,C816,WPS300,WPS111,WPS431,WPS226,WPS110,WPS404,WPS601,WPS237,WPS202,WPS115,WPS201,WPS232,WPS432,WPS229"
           - "--select=WPS"
         files: ^(services/content-actions-service/src|services/notification-service/src)/
         exclude: ^services/notification-service/src/migration/.*
@@ -82,9 +82,23 @@ repos:
           "--config-file=pyproject.toml",
           "--no-implicit-reexport",
           "--show-error-context",
-          "--verbose"
+          "--verbose",
+          "--explicit-package-bases"
         ]
-        files: ^(services/content-actions-service/src|services/notification-service/src)/
+        files: ^services/content-actions-service/src/
+        additional_dependencies:
+          - mypy==1.13.0
+          - types-ujson
+      - id: mypy
+        name: mypy-notification-service
+        args: [
+          "--config-file=pyproject.toml",
+          "--no-implicit-reexport",
+          "--show-error-context",
+          "--verbose",
+          "--explicit-package-bases"
+        ]
+        files: ^services/notification-service/src/
         additional_dependencies:
           - mypy==1.13.0
           - types-ujson

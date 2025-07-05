@@ -6,6 +6,7 @@ from typing import Any
 from uuid import UUID
 
 from api.v1.filmwork.schemas import FilmDetailResponse, FilmListResponse, FilmSorted, FilmsType
+from api.v1.internal.schemas import FilmInternalResponse
 from auth_utils import Permissions
 from core.config import app_config
 from db.cache import Cache, get_cache
@@ -88,6 +89,20 @@ class FilmRepository:
             page_size=page_size,
             page_number=page_number,
         )
+        return found_films
+
+    async def get_list_film_by_ids(self, film_ids: list[UUID]) -> list[FilmLogic]:
+        """Получить список фильмов из ElasticSearch по списку film_id"""
+        film_ids_str_list = [str(film_id) for film_id in film_ids]
+        query = {
+            "query": {
+                "bool": {
+                    "filter": [{"terms": {"id": film_ids_str_list}}],
+                },
+            },
+        }
+
+        found_films = await self._search_films(query_search=query, page_size=1000, page_number=1)
         return found_films
 
     async def get_list_film_by_query(
@@ -381,6 +396,17 @@ class FilmService:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Недостаточно прав для получения этого фильма",
         )
+
+    async def get_films_by_id_internal(
+        self,
+        film_ids: list[UUID],
+    ) -> list[FilmInternalResponse]:
+        """Получить детальную информацию о фильме по UUID."""
+
+        films_from_db = await self.repository.get_list_film_by_ids(film_ids=film_ids)
+        films = [FilmInternalResponse.transform_from_FilmLogic(film) for film in films_from_db]
+
+        return films
 
 
 @lru_cache

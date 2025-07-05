@@ -89,6 +89,8 @@ content-stop:
 up-local-content-api:
 	cd services/content-actions-service/src/ && uvicorn main:app --port 8009 --reload
 
+up-local-notification:
+	cd services/notification-service/src/ && uvicorn main:app --port 8009 --reload
 
 # Rabbit only
 up-rabbit:
@@ -104,7 +106,7 @@ down-rabbit:
 
 # Notification service
 notifications-api-start:
-	docker compose --profile production up --build -d postgres pg-import auth-api redis jaeger nginx notification-api
+	docker compose --profile production up --build -d postgres pg-import auth-api redis jaeger nginx notification
 
 notifications-api-down:
-	docker compose --profile production down notification-api postgres pg-import auth-api redis jaeger nginx
+	docker compose --profile production down notification postgres pg-import auth-api redis jaeger nginx

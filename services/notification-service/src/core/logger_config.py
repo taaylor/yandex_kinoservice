@@ -83,6 +83,21 @@ class LoggerSettings(BaseSettings):
                     "level": self.log_level,
                     "propagate": False,
                 },
+                "sqlalchemy": {
+                    "handlers": ["console"],
+                    "level": "WARNING",
+                    "propagate": False,
+                },
+                "opentelemetry": {
+                    "handlers": ["console"],
+                    "level": "WARNING",
+                    "propagate": False,
+                },
+                "httpcore": {
+                    "handlers": ["console"],
+                    "level": "WARNING",
+                    "propagate": False,
+                },
             },
             "root": {
                 "level": self.log_level,
