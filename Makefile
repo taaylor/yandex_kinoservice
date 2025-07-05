@@ -108,3 +108,6 @@ notifications-api-start:
 
 notifications-api-down:
 	docker compose --profile production down notification-api postgres pg-import auth-api redis jaeger nginx
+
+ws-sender-start:
+	docker compose up --build -d rabbitmq-1 rabbitmq-2 rabbitmq-3 rabbit-init nginx ws-sender-worker redis

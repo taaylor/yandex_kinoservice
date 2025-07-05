@@ -1,0 +1,22 @@
+[project]
+name = "ws-notification-service"
+version = "0.1.0"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "aiohttp (==3.12.13)",
+    "pydantic (==2.11.7)",
+    "pydantic-settings (==2.10.1)",
+    "aio-pika (==9.5.5)",
+    "redis (==5.3.0)",
+    "uvicorn (==0.35.0)",
+    "gunicorn (==23.0.0)",
+    "aiohttp-asgi (==0.6.1)",
+]
+
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
