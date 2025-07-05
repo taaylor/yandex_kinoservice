@@ -6,6 +6,7 @@ include:
   - ./infra/mongodb/docker-compose.mongodb.yml
   - ./infra/rabbit/docker-compose.rabbit.yml
   - ./services/metric-service/docker-compose.metric-services.yml
+  - ./services/event-generator/docker-compose.event-generator.yml
 
 services:
   elasticsearch:

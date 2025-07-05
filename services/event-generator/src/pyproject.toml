@@ -14,8 +14,8 @@ dependencies = [
     "backoff (==2.2.1)",
     "sentry-sdk (==2.30.0)",
     "celery>=5.5.3",
-    "flower>=2.0.1"
-
+    "flower>=2.0.1",
+    "backoff-async>=2.0.0"
 ]
 
 [project.optional-dependencies]

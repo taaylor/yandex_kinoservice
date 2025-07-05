@@ -17,18 +17,13 @@ celery_engine = Celery(
 # Расписание запуска задач для celery beat
 # Ключ в словаре может быть любым, а внутри "task": <value> value должно быть названием таски
 celery_engine.conf.beat_schedule = {
-    "issue.reminder_1day": {
-        "task": "issue.reminder_1day",
+    "issue.test_reminder_get_fresh_films_10_seconds": {
+        "task": "issue.test_reminder_get_fresh_films_10_seconds",
         "schedule": 10,  # каждые 10 секнд
-        # "schedule": crontab(minute="0", hour="9"),  # каждое утро в 9:00
     },
-    "issue.reminder_3days": {
-        "task": "issue.reminder_3days",
-        "schedule": crontab(minute="0", hour="13"),  # каждый день в 13:00
+    "issue.reminder_get_fresh_films_each_friday": {
+        "task": "issue.reminder_get_fresh_films_each_friday",
+        # каждую неделю в пятницу утром
+        "schedule": crontab(minute=0, hour=9, day_of_week="fri"),
     },
-    # "luboe-nazvanie": {
-    #     "task": "periodic_task",
-    #     "schedule": 5,  # секунды
-    #     # "schedule": crontab(minute="30", hour="15"),
-    # }
 }

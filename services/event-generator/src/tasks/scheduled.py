@@ -1,34 +1,19 @@
 import asyncio
+from pprint import pprint as pp
 
+from services.notification_sheduler_service import FilmSchedulerService
 from tasks.celery_config import celery_engine
 
 
-def mock_sync_task():
-    return {"status": "ok", "broker": "rabbitmq", "detail": "SYNC executing"}
+@celery_engine.task(name="issue.test_reminder_get_fresh_films_10_seconds")
+def remind_10_seconds():
+    result = asyncio.run(FilmSchedulerService.execute_task())
+    pp(result)  # временно, чтобы видеть, что запрос выпоняется
+    return True
 
 
-async def mock_async_task():
-    await asyncio.sleep(1)
-    return {"status": "ok", "broker": "rabbitmq", "detail": "ASYNC executing"}
-
-
-@celery_engine.task(name="issue.reminder_1day")
-def remind_1day():
-    result = asyncio.run(mock_async_task())
-    print(result)
-
-
-@celery_engine.task(name="issue.reminder_3days")
-def remind_3days():
-    print(mock_sync_task())
-
-
-async def get_data():
-    await asyncio.sleep(5)
-
-
-# @celery_engine.task(name="periodic_task")
-def periodic_task():
-    """Пример запуска асинхронной функции внутри celery таски"""
-    print(12345)
-    asyncio.run(get_data())
+@celery_engine.task(name="issue.reminder_get_fresh_films_each_friday")
+def remind_each_friday():
+    result = asyncio.run(FilmSchedulerService.execute_task())
+    pp(result)  # временно, чтобы видеть, что запрос выпоняется
+    return True
