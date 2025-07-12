@@ -15,14 +15,13 @@ dependencies = [
     "sentry-sdk (==2.30.0)",
     "celery>=5.5.3",
     "flower>=2.0.1",
-    "backoff-async>=2.0.0"
+    "jinja2 (==3.1.6)",
+    "lxml (==6.0.0)",
+    "sqlalchemy (==2.0.40)",
 ]
 
 [project.optional-dependencies]
-test = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.23.0"
-]
+test = ["pytest>=7.0.0", "pytest-asyncio>=0.23.0"]
 
 [tool.poetry]
 package-mode = false

@@ -140,7 +140,6 @@ event-generator-down-v:
 event-generator-reload:
 	docker compose -f $(COMPOSE_FILE) down -v async-api es-init kibana nginx rabbitmq-1 rabbitmq-2 rabbitmq-3 rabbit-init elasticsearch redis notification event-generator celery-beat postgres && docker compose -f $(COMPOSE_FILE) up --build -d async-api es-init kibana nginx rabbitmq-1 rabbitmq-2 rabbitmq-3 rabbit-init notification-api event-generator celery-beat
 
-
 up-link:
 	docker compose --profile production up --build -d postgres link nginx
 

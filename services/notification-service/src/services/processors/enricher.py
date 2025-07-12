@@ -1,6 +1,7 @@
 import logging
 from uuid import UUID
 
+from core.config import app_config
 from models.enums import EventType, NotificationStatus
 from models.logic_models import Film, UserProfile
 from models.models import Notification
@@ -237,6 +238,7 @@ class NotificationEnricher:  # noqa: WPS214
             notify.user_timezone = user_profile.user_timezone
             notify.event_data.update(
                 {
+                    "template_id": app_config.templates.get("user_registered_type"),
                     "username": user_profile.username,
                     "first_name": user_profile.first_name,
                     "last_name": user_profile.last_name,

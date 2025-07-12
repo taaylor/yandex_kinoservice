@@ -1,5 +1,6 @@
 import logging
 
+from api.v1 import admin_api
 from core.config import app_config
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -54,3 +55,5 @@ setup_exception_handlers(app)
 
 # Добавляю миддлвар для доступа Request во всех эндпоинтах
 app.add_middleware(RequestContextMiddleware)
+SERVICE_PATH = "/event-generator/api/v1/"
+app.include_router(admin_api.router, prefix=f"{SERVICE_PATH}admin", tags=["Админ-панель"])

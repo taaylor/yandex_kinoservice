@@ -2,6 +2,7 @@
 services:
 
   email-sender:
+    container_name: email-sender
     build:
       context: ../..
       dockerfile: services/email-sender/src/Dockerfile
@@ -23,6 +24,7 @@ services:
     restart: always
 
   mailhog:
+    container_name: mailhog
     image: mailhog/mailhog:latest
     ports:
       - "1025:1025"   # SMTP

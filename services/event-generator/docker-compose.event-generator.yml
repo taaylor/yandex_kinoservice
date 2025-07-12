@@ -14,10 +14,10 @@ services:
     depends_on:
       rabbitmq-1:
         condition: service_healthy
-      rabbitmq-2:
-        condition: service_healthy
-      rabbitmq-3:
-        condition: service_healthy
+      # rabbitmq-2:
+      #   condition: service_healthy
+      # rabbitmq-3:
+      #   condition: service_healthy
 
     restart: always
 

@@ -108,6 +108,8 @@ class AppConfig(BaseSettings):
     rabbitmq: RabbitMQ = RabbitMQ()
     redis: Redis = Redis()
 
+    templates: dict = {"user_registered_type": "f69248f5-4f6c-4cd4-82ca-e8f6cd68483f"}
+
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
         case_sensitive=False,

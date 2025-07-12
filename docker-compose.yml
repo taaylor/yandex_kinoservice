@@ -29,7 +29,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: always
+    restart: "always"
 
   jaeger:
     container_name: jaeger-container
@@ -41,7 +41,7 @@ services:
       - "16686:16686"     # порт веб-интерфейса
       - "4317:4317"       # порт OTLP gRPC
       - "4318:4318"       # порт OTLP HTTP
-    restart: always
+    restart: "always"
 
   kibana:
     container_name: kibana-container
@@ -56,7 +56,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    restart: always
+    restart: "always"
 
   es-init:
     container_name: es-init-container
@@ -111,7 +111,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: always
+    restart: "always"
 
   auth-api:
     container_name: auth-api
@@ -137,7 +137,7 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
-    restart: always
+    restart: "always"
 
   async-api:
     container_name: async-api
@@ -161,7 +161,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: always
+    restart: "always"
 
   content-actions-api:
     container_name: content-actions-api
@@ -189,7 +189,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: always
+    restart: "always"
 
   admin-panel:
     container_name: admin-panel
@@ -208,7 +208,7 @@ services:
         condition: service_healthy
       auth-api:
         condition: service_healthy
-    restart: always
+    restart: "always"
 
   postgres:
     container_name: postgres-container
@@ -227,7 +227,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: always
+    restart: "always"
 
   pg-import:
     container_name: pg-import
@@ -263,8 +263,8 @@ services:
         condition: service_healthy
       async-api:
         condition: service_healthy
-    expose:
-      - "8000:8000"
+    ports:
+      - "8001:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/notification/openapi"]
       interval: 10s
@@ -309,7 +309,7 @@ services:
         condition: service_healthy
       rabbit-init:
         condition: service_completed_successfully
-    restart: "on-failure"
+    restart: "always"
 
   nginx:
     container_name: nginx
@@ -323,7 +323,7 @@ services:
     ports:
       - "${NGINX_PORT}:${NGINX_PORT}"
       - "${NGINX_RABBIT_MANAGEMENT_PORT}:${NGINX_RABBIT_MANAGEMENT_PORT}"
-    restart: always
+    restart: "always"
 
 volumes:
   redis_data:
