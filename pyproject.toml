@@ -37,6 +37,7 @@ psycopg2 = "^2.9.10"
 orjson = "^3.10.18"
 aio-pika = "^9.5.5"
 
+
 [tool.poetry.group.dev.dependencies]
 pre-commit = ">=4.1.0,<5.0.0"
 isort = ">=6.0.0,<7.0.0"
@@ -71,8 +72,22 @@ line_length = 100
 [tool.flake8]
 max-line-length = 100
 extend-ignore = [
-    "E203", "W503","C812","C813","C814","C815S","C816","WPS300","WPS111","WPS431","WPS226","WPS110","WPS404","WPS601","WPS237"
-    ]
+    "E203",
+    "W503",
+    "C812",
+    "C813",
+    "C814",
+    "C815S",
+    "C816",
+    "WPS300",
+    "WPS111",
+    "WPS431",
+    "WPS226",
+    "WPS110",
+    "WPS404",
+    "WPS601",
+    "WPS237",
+]
 exclude = [
     ".git",
     "__pycache__",
@@ -83,7 +98,7 @@ exclude = [
     "services/auth-service/src/migration",
     "services/auth-service/src/migrations",
     "services/admin-panel/src/accounts/migrations",
-    "services/notification-service/src/migration"
+    "services/notification-service/src/migration",
 ]
 
 [tool.mypy]

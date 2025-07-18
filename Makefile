@@ -101,6 +101,9 @@ up-local-link:
 event-generator-local:
 	cd services/event-generator/src/ && uvicorn main:app --port 8009 --reload
 
+up-nl-consumer-local:
+	cd services/nl-consumer/src/ && uvicorn main:app --port 8009 --reload
+
 
 # Запуск всех сервисов контекста нотификаций
 up-notification-context:
