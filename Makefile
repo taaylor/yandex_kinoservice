@@ -98,6 +98,9 @@ up-local-auth:
 up-local-link:
 	cd services/short-link-service/src/ && uvicorn main:app --port 8009 --reload
 
+up-local-embedding:
+	cd services/embedding-service/src/ && uvicorn main:app --port 8009 --reload
+
 event-generator-local:
 	cd services/event-generator/src/ && uvicorn main:app --port 8009 --reload
 

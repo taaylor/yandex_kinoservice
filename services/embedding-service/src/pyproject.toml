@@ -1,0 +1,20 @@
+[project]
+name = "embedding-service"
+version = "0.1.0"
+authors = [
+    {name = "Maksim Ushakov",email = "jw999coding@gmail.com"}
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[all] (==0.115.12)",
+    "uvicorn (==0.34.1)",
+    "gunicorn (==23.0.0)",
+    "pydantic-settings (==2.9.1)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
