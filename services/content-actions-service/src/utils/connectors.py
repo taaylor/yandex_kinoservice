@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from models.models import Bookmark, Rating, Review, ReviewLike
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
+from utils.aiokafka_conn import get_broker_connector
 
 
 @asynccontextmanager
@@ -32,7 +33,11 @@ async def lifespan(app: FastAPI):
         retry_on_timeout=False,
     )
 
+    broker = get_broker_connector()
+    await broker.connect()
+
     yield
 
     await cache.cache_conn.close()
     engine.close()
+    await broker.disconnect()

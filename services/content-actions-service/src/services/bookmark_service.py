@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from functools import lru_cache
 from uuid import UUID
@@ -16,6 +17,7 @@ from fastapi import Depends, HTTPException, status
 from models.enum_models import FilmBookmarkState
 from services.bookmark_repository import BookmarkRepository, get_bookmark_repository
 from tracer_utils import traced
+from utils.aiokafka_conn import AIOMessageBroker, get_broker_connector
 from utils.film_id_validator import FilmIdValidator, get_film_id_validator
 
 logger = logging.getLogger(__name__)
@@ -26,12 +28,13 @@ CACHE_KEY_USER_BOOKMARKS = "bookmarks:{user_id}:{page}"
 class BookmarkService:
     """Класс реализую бизнес логику работы с списком просмотра фильмов"""
 
-    __slots__ = ("cache", "repository", "film_id_validator")
+    __slots__ = ("cache", "repository", "film_id_validator", "message_broker")
 
-    def __init__(self, cache, repository, film_id_validator) -> None:
+    def __init__(self, cache, repository, film_id_validator, message_broker) -> None:
         self.cache: Cache = cache
         self.repository: BookmarkRepository = repository
         self.film_id_validator: FilmIdValidator = film_id_validator
+        self.message_broker: AIOMessageBroker = message_broker
 
     @traced("add_now_bookmark_service_action")
     async def add_bookmark_by_film_id(
@@ -53,14 +56,20 @@ class BookmarkService:
 
         if inserted_bookmark:
             await self._invalidate_user_bookmark_cache(user_id)
-            return CreateBookmarkResponse(
+            bookmark = CreateBookmarkResponse(
                 film_id=inserted_bookmark.film_id,
                 comment=inserted_bookmark.comment,
                 status=inserted_bookmark.status,
                 created_at=inserted_bookmark.created_at,
                 updated_at=inserted_bookmark.updated_at,
             )
-
+            asyncio.create_task(
+                self.message_broker.push_message(
+                    topic=app_config.kafka.rec_bookmarks_list_topic,
+                    value=bookmark.model_dump_json(),
+                )
+            )
+            return bookmark
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Не удалось добавить фильм в список просмотра",
@@ -171,6 +180,7 @@ def get_bookmark_service(
     cache: Cache = Depends(get_cache),
     repository: BookmarkRepository = Depends(get_bookmark_repository),
     film_id_validator: FilmIdValidator = Depends(get_film_id_validator),
+    message_broker: AIOMessageBroker = Depends(get_broker_connector),
 ) -> BookmarkService:
 
-    return BookmarkService(cache, repository, film_id_validator)
+    return BookmarkService(cache, repository, film_id_validator, message_broker)

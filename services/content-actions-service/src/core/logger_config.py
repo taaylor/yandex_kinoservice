@@ -99,6 +99,11 @@ class LoggerSettings(BaseSettings):
                     "handlers": self.log_default_handlers,
                     "propagate": False,
                 },
+                "aiokafka": {
+                    "level": "INFO",
+                    "handlers": self.log_default_handlers,
+                    "propagate": False,
+                },
             },
             "root": {
                 "level": self.log_level,

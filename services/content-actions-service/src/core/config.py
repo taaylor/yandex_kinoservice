@@ -61,6 +61,33 @@ class NotificationAPI(BaseModel):
         return f"http://{self.host}:{self.port}{self.profile_path}"
 
 
+class Kafka(BaseModel):
+    host1: str = "localhost"
+    port1: int = 9094
+    host2: str = "localhost"
+    port2: int = 9095
+    host3: str = "localhost"
+    port3: int = 9096
+
+    retry_backoff_ms: int = 100
+    request_timeout_ms: int = 5000
+    batch_size: int = 5120
+    linger_ms: int = 5
+    buffer_memory: int = 33554432
+    security_protocol: str = "PLAINTEXT"
+
+    @property
+    def get_servers(self) -> list[str]:
+        return [
+            f"{self.host1}:{self.port1}",
+            f"{self.host2}:{self.port2}",
+            f"{self.host3}:{self.port3}",
+        ]
+
+    rec_bookmarks_list_topic: str = "rec_bookmarks_list_topic"
+    rec_user_ratings_films_topic: str = "rec_user_ratings_films_topic"
+
+
 class AppConfig(BaseSettings):
     glitchtip_url: str = "url"
     is_glitchtip_enabled: bool = False
@@ -97,6 +124,7 @@ class AppConfig(BaseSettings):
     mongodb: MongoDB = MongoDB()  # type: ignore
     server: Server = Server()
     notification_api: NotificationAPI = NotificationAPI()
+    kafka: Kafka = Kafka()
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,

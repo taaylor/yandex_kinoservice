@@ -73,7 +73,11 @@ test-content-service-ci:
 
 # -=-=-=-=- Секция content-actions-service -=-=-=-=-
 content-service-up:
-	docker compose -f $(COMPOSE_FILE) --profile production up -d --build content-actions-api mongodb_router auth-api postgres pg-import jaeger glitchtip-postgres glitchtip-redis glitchtip-web glitchtip-worker glitchtip-migrate$(srv)
+	docker compose -f $(COMPOSE_FILE) --profile production up -d --build content-actions-api mongodb_router auth-api postgres pg-import jaeger glitchtip-postgres glitchtip-redis glitchtip-web glitchtip-worker glitchtip-migrate$(srv) kafka-0 kafka-1 kafka-2 ui kafka-init nginx
+
+
+content-service-low:
+	docker compose -f $(COMPOSE_FILE) up -d --build content-actions-api mongodb_router auth-api postgres pg-import kafka-0 kafka-1 kafka-2 ui kafka-init nginx
 
 # Остановка контейнеров и удаление волуме
 content-service-down-v:
