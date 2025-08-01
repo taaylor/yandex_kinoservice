@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -24,10 +25,10 @@ class Film(BaseModel):
     title: str
     imdb_rating: float | None
     description: str | None
-    genre: list[dict]
-    actors: list[dict]
-    writers: list[dict]
-    directors: list[dict]
+    genre: list[dict[str, Any]]
+    actors: list[dict[str, Any]]
+    writers: list[dict[str, Any]]
+    directors: list[dict[str, Any]]
     type: str
 
 
@@ -42,7 +43,7 @@ class NotificationLogic(BaseModel):
     added_queue_at: datetime | None
     priority: str
     event_type: str
-    event_data: dict
+    event_data: dict[str, Any]
     user_timezone: str | None
     template_id: UUID | None
     mass_notification_id: UUID | None

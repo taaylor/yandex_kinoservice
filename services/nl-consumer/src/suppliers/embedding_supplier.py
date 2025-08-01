@@ -44,7 +44,7 @@ class EmbeddingSupplier(BaseSupplier):
 
             return self._decode_embedding(embedding_response)
 
-    def _decode_embedding(self, embedding_response: dict) -> list[float]:
+    def _decode_embedding(self, embedding_response: list[dict[str, str]]) -> list[float]:
         """Декодирует эмбеддинг из ответа сервиса."""
 
         # Example response: {"id": "1234", "embedding": "<base64_string>"}

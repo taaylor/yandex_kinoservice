@@ -26,10 +26,6 @@ class RatingEvent(TimeFields, FilmIdFiled, UserFiled):
     score: int
 
 
-class FilmDescription:
-    pass
-
-
 class GenreLogic(BaseModel):
     id: UUID
     name: str

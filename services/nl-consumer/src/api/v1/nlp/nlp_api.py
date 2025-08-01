@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from api.v1.nlp.schemas import RecsRequest, RecsResponse
-from auth_utils import LibAuthJWT, auth_dep
+from auth_utils import get_current_user_id
 from fastapi import APIRouter, Body, Depends
 from services.nlp_service import NlpService, get_nlp_service
 
@@ -20,10 +20,8 @@ router = APIRouter()
     response_model=RecsResponse,
 )
 async def fetch_films_by_user_query(
-    authorize: Annotated[LibAuthJWT, Depends(auth_dep)],
+    user_jwt_id: Annotated[UUID, Depends(get_current_user_id)],
     service: Annotated[NlpService, Depends(get_nlp_service)],
     request_body: Annotated[RecsRequest, Body],
 ) -> RecsResponse:
-    await authorize.jwt_required()
-    user_jwt_id = UUID((await authorize.get_raw_jwt())["user_id"])  # type: ignore
     return await service.process_nl_query(user_jwt_id, request_body)

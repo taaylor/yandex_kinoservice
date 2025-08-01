@@ -28,7 +28,9 @@ class EmptyServerResponse(ExternalServiceError):
     """Получен пустой ответ"""
 
 
-def handle_http_errors(service_name: str = "внешний сервис") -> Callable:  # noqa: WPS238, WPS231
+def handle_http_errors(  # noqa: WPS238, WPS231
+    service_name: str = "внешний сервис",
+) -> Callable[..., Any]:
     """
     Декоратор для обработки HTTP ошибок при запросам к внешним сервисам
 
@@ -36,7 +38,7 @@ def handle_http_errors(service_name: str = "внешний сервис") -> Cal
         service_name: Название сервиса для логирования
     """
 
-    def decorator(func: Callable) -> Callable:  # noqa: WPS238, WPS231
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: WPS238, WPS231
         @wraps(func)
         async def wrapper(*args, **kwargs) -> Any:  # noqa: WPS238, WPS231, WPS225
             try:  # noqa: WPS225

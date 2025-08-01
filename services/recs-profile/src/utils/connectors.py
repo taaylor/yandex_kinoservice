@@ -13,7 +13,7 @@ from utils.aiokafka_conn import create_consumer_manager
 logger = logging.getLogger(__name__)
 
 
-async def monitor_tasks(task: asyncio.Task, task_name: str) -> None:
+async def monitor_tasks(task: asyncio.Task[None], task_name: str) -> None:
     try:
         await task
     except asyncio.CancelledError:

@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 logger = logging.getLogger(__name__)
 
 
-async def monitor_tasks(task: asyncio.Task, task_name: str) -> None:
+async def monitor_tasks(task: asyncio.Task[None], task_name: str) -> None:
     try:
         await task
     except asyncio.CancelledError:

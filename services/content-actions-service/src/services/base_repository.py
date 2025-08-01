@@ -162,5 +162,5 @@ class BaseRepository[T: Document]:  # noqa: WPS214
 
 
 @lru_cache()
-def get_rating_repository(model: type[Document]) -> BaseRepository:
+def get_rating_repository(model: type[Document]) -> BaseRepository[Document]:
     return BaseRepository(model)

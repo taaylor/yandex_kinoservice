@@ -24,7 +24,7 @@ class MessageHandler(Protocol):
         ...
 
 
-class KafkaConsumerManager:
+class KafkaConsumerManager:  # noqa: WPS214
     """Менеджер для управления Kafka консюмером с улучшенной обработкой ошибок."""
 
     def __init__(
@@ -40,25 +40,6 @@ class KafkaConsumerManager:
         self._consumer_kwargs = consumer_kwargs
         self._consumer: AIOKafkaConsumer | None = None
         self._is_running = False
-
-    def _create_consumer(self) -> AIOKafkaConsumer:
-        """Создать экземпляр Kafka консюмера."""
-        # Преобразуем список серверов в строку, если нужно
-
-        return AIOKafkaConsumer(
-            *self._topics,
-            bootstrap_servers=self._bootstrap_servers,  # type: ignore
-            group_id=self._group_id,
-            enable_auto_commit=True,
-            auto_commit_interval_ms=5000,
-            auto_offset_reset="earliest",
-            session_timeout_ms=60000,
-            heartbeat_interval_ms=20000,
-            max_poll_interval_ms=300000,
-            request_timeout_ms=app_config.kafka.request_timeout_ms,
-            retry_backoff_ms=app_config.kafka.retry_backoff_ms,
-            security_protocol=app_config.kafka.security_protocol,
-        )
 
     @backoff.on_exception(
         backoff.expo,
@@ -101,19 +82,7 @@ class KafkaConsumerManager:
         finally:
             self._consumer = None
 
-    async def _safe_message_handler(
-        self, message_handler: MessageHandler, topic: str, message: bytes
-    ) -> None:
-        """Безопасно обработать сообщение с логированием ошибок."""
-        try:
-            await message_handler(topic, message)
-        except Exception as e:
-            logger.error(
-                f"Ошибка при обработке сообщения из топика {topic}: {e}",
-                exc_info=True,
-            )
-
-    async def consume_messages(
+    async def consume_messages(  # noqa: WPS210, WPS213, WPS231, WPS220
         self,
         message_handler: MessageHandler,
         max_messages_per_batch: int = 100,
@@ -128,30 +97,30 @@ class KafkaConsumerManager:
             raise RuntimeError("Consumer не запущен. Вызовите start() сначала.")
 
         logger.info("Начало потребления сообщений...")
-
+        # TODO: Разбить код ниже на несколько функций.
         try:
             while self._is_running:
-                try:
+                try:  # noqa: WPS505
                     message_batch = await self._consumer.getmany(
                         timeout_ms=10000, max_records=max_messages_per_batch
                     )
 
                     if not message_batch:
-                        continue
+                        continue  # noqa: WPS220
 
                     # Обрабатываем все сообщения в батче
                     tasks = []
                     for topic_partition, messages in message_batch.items():
-                        for message in messages:
-                            if message.value is not None:
-                                task = self._safe_message_handler(
+                        for message in messages:  # noqa: WPS220
+                            if message.value is not None:  # noqa: WPS220
+                                task = self._safe_message_handler(  # noqa: WPS220
                                     message_handler, message.topic, message.value
                                 )
-                                tasks.append(task)
+                                tasks.append(task)  # noqa: WPS220
 
                     if tasks:
-                        await asyncio.gather(*tasks, return_exceptions=True)
-                        logger.debug(f"Обработано {len(tasks)} сообщений")
+                        await asyncio.gather(*tasks, return_exceptions=True)  # noqa: WPS220
+                        logger.debug(f"Обработано {len(tasks)} сообщений")  # noqa: WPS220
 
                 except ConsumerStoppedError:
                     logger.info("Consumer был остановлен")
@@ -183,6 +152,37 @@ class KafkaConsumerManager:
     def is_running(self) -> bool:
         """Проверить, запущен ли консюмер."""
         return self._is_running
+
+    async def _safe_message_handler(
+        self, message_handler: MessageHandler, topic: str, message: bytes
+    ) -> None:
+        """Безопасно обработать сообщение с логированием ошибок."""
+        try:
+            await message_handler(topic, message)
+        except Exception as e:
+            logger.error(
+                f"Ошибка при обработке сообщения из топика {topic}: {e}",
+                exc_info=True,
+            )
+
+    def _create_consumer(self) -> AIOKafkaConsumer:
+        """Создать экземпляр Kafka консюмера."""
+        # Преобразуем список серверов в строку, если нужно
+
+        return AIOKafkaConsumer(
+            *self._topics,
+            bootstrap_servers=self._bootstrap_servers,  # type: ignore
+            group_id=self._group_id,
+            enable_auto_commit=True,
+            auto_commit_interval_ms=5000,
+            auto_offset_reset="earliest",
+            session_timeout_ms=60000,
+            heartbeat_interval_ms=20000,
+            max_poll_interval_ms=300000,
+            request_timeout_ms=app_config.kafka.request_timeout_ms,
+            retry_backoff_ms=app_config.kafka.retry_backoff_ms,
+            security_protocol=app_config.kafka.security_protocol,
+        )
 
 
 def create_consumer_manager(

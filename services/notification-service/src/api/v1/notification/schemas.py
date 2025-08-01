@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Any
 from uuid import UUID
 
 from models.enums import EventType, NotificationMethod, Priority
@@ -21,7 +22,7 @@ class SingleNotificationRequest(BaseModel):
         Priority.LOW,
         description="Приоритет, с которым будет отправлено уведомление. HIGH доставляются без учёта таймзоны пользователя",  # noqa: E501
     )
-    event_data: dict = Field(
+    event_data: dict[str, Any] = Field(
         default_factory=dict,
         description="Контекст события, которое привело к запросу на нотификацию",
     )
@@ -83,7 +84,7 @@ class MassNotificationRequest(BaseModel):
         Priority.LOW,
         description="Приоритет, с которым будет отправлено уведомление. HIGH доставляются без учёта таймзоны пользователя",  # noqa: E501
     )
-    event_data: dict = Field(
+    event_data: dict[str, Any] = Field(
         default_factory=dict,
         description="Контекст события, которое привело к запросу на нотификацию",
     )

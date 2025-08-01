@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Any, Callable
 
 import aio_pika
 from aio_pika.abc import AbstractIncomingMessage, AbstractRobustChannel, AbstractRobustConnection
@@ -16,7 +16,7 @@ class AsyncMessageBroker(ABC):
     """Абстрактный класс для работы с брокером сообщений."""
 
     @abstractmethod
-    async def consumer(self, queue_name: str, callback: Callable):
+    async def consumer(self, queue_name: str, callback: Callable[..., Any]):
         """
         Метод позволяет прочитать сообщения из очереди, и выполнить их обработку
         :queue_name - название очереди
@@ -43,7 +43,7 @@ class RabbitMQConnector(AsyncMessageBroker):
         self._channel_pool: Pool = Pool(self._get_channel, max_size=1)
         self._connection_pool: Pool = Pool(self._get_connection, max_size=1)
 
-    async def consumer(self, queue_name: str, callback: Callable) -> None:
+    async def consumer(self, queue_name: str, callback: Callable[..., Any]) -> None:
         async with self._channel_pool.acquire() as channel:
 
             try:

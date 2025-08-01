@@ -9,7 +9,7 @@ from services.base_repository import BaseRepository
 logger = logging.getLogger(__name__)
 
 
-class RatingRepository(BaseRepository):
+class RatingRepository(BaseRepository[Rating]):
     """Репозиторий для работы с рейтингами (модель Rating)."""
 
     __slots__ = ("collection",)  # переопределяем в классе наследнике, т.к. __slots__ не наследуется

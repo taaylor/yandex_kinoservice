@@ -106,6 +106,7 @@ exclude = [
 python_version = "3.12"
 disallow_untyped_defs = false
 ignore_missing_imports = true
+disallow_any_generics = true
 
 [[tool.mypy.overrides]]
 module = "redis.asyncio"

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import backoff
 import httpx
@@ -41,7 +42,9 @@ class FilmSupplier(BaseSupplier):
         jitter=backoff.full_jitter,
     )
     @handle_http_errors(service_name=app_config.filmapi.host)
-    async def _make_request(self, method: HttpMethods, url: str, data: dict | None = None) -> dict:
+    async def _make_request(
+        self, method: HttpMethods, url: str, data: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """Выполняет HTTP-запрос к внешнему API."""
         async with httpx.AsyncClient(timeout=httpx.Timeout(self.timeout)) as client:
 
@@ -70,7 +73,9 @@ class FilmSupplier(BaseSupplier):
             return response_data
 
     def _convert_to_model(
-        self, json: dict, model: type[GenreResponse] | type[FilmListResponse]
+        self,
+        json: list[dict[str, Any]],
+        model: type[GenreResponse] | type[FilmListResponse],  # noqa: WPS221
     ) -> list[GenreResponse | FilmListResponse]:
         """Преобразует JSON-ответ в список объектов модели."""
         if model is GenreResponse:

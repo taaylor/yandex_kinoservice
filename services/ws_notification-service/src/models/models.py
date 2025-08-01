@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -28,7 +29,7 @@ class EventSchemaMessage(BaseModel):
     )
     priority: Priority = Field(description="Приоритет уведомления (например, LOW)")
     event_type: str = Field(description="Тип уведомления (например, user_review_liked)")
-    event_data: dict = Field(default_factory=dict, description="Данные уведомления")
+    event_data: dict[str, Any] = Field(default_factory=dict, description="Данные уведомления")
     user_timezone: str | None = Field(
         default=None, description="Часовой пояс пользователя", exclude=True
     )

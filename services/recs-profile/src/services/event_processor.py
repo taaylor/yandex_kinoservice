@@ -16,7 +16,7 @@ from suppliers.film_supplier import FilmSupplier, get_film_supplier
 logger = logging.getLogger(__name__)
 
 
-class RecsEventProcessor(BaseService[RecsRepository]):
+class RecsEventProcessor(BaseService[RecsRepository]):  # noqa: WPS214
     """Класс обрабатывает события из Kafka и сохраняет рекомендации в БД."""
 
     def __init__(
@@ -69,7 +69,6 @@ class RecsEventProcessor(BaseService[RecsRepository]):
             logger.info(
                 f"Пользователь недостаточно высоко оценил фильм для создания рекомендации: {event.score}"  # noqa: E501
             )
-            return None
 
         embedding = await self._fetch_embedding(event.film_id)
         await self._save_rec_to_repository(event, RecsSourceType.HIGH_RATING, embedding)

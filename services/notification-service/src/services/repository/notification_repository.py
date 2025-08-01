@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from functools import lru_cache
-from typing import TypeVar
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
@@ -16,10 +15,8 @@ from utils.serialization_utils import make_serializable
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar("T", Notification, MassNotification)
 
-
-class NotificationRepository(BaseRepository):  # noqa: WPS214
+class NotificationRepository(BaseRepository[Notification | MassNotification]):  # noqa: WPS214
 
     @sqlalchemy_universal_decorator
     async def create_new_notification(
@@ -57,7 +54,7 @@ class NotificationRepository(BaseRepository):  # noqa: WPS214
         """Получает отложенные уведомления и сразу меняет их статус на PROCESSING"""
         db_notifications: list[Notification] = await self._get_delayed_notifications_list(
             session=session
-        )
+        )  # type: ignore
 
         # Сразу меняем статус, чтобы другие процессы их не взяли
         for notify in db_notifications:
@@ -163,7 +160,7 @@ class NotificationRepository(BaseRepository):  # noqa: WPS214
         db_notifications: list[MassNotification] = await self._get_delayed_notifications_list(
             session=session,
             mass_notification=True,
-        )
+        )  # type: ignore
 
         for notify in db_notifications:
             notify.status = MassNotificationStatus.SENDING
@@ -176,7 +173,7 @@ class NotificationRepository(BaseRepository):  # noqa: WPS214
         session: AsyncSession,
         limit: int = 10,
         mass_notification: bool = False,
-    ) -> list[T]:
+    ) -> list[Notification | MassNotification]:
         """
         Извлекает отложенные уведомления из одной из двух моделей.
 

@@ -13,7 +13,7 @@ from storage.messagebroker import AsyncMessageBroker, get_message_broker
 logger = logging.getLogger(__name__)
 
 
-async def monitor_task(task: asyncio.Task, name: str):
+async def monitor_task(task: asyncio.Task[None], name: str):
     """Мониторит выполнение задачи и отлавливает исключения."""
     try:
         await task

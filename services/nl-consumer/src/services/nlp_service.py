@@ -40,7 +40,6 @@ class NlpService(BaseService):
         языке и отдаёт фильмы или запрос на уточнение."""
         embedding = []
         films = None
-        message = ""
         genres = await self.film_supplier.fetch_genres()
         logger.debug(f"Получен список жанров: {genres}")
 

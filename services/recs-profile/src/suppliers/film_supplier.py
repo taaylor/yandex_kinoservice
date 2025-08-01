@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from uuid import UUID
 
 import backoff
@@ -31,7 +32,9 @@ class FilmSupplier(BaseSupplier):
         jitter=backoff.full_jitter,
     )
     @handle_http_errors(service_name=app_config.filmapi.host)
-    async def _make_request(self, url: str, data: dict | None = None) -> dict:
+    async def _make_request(
+        self, url: str, data: dict[str, Any] | None = None
+    ) -> dict[str, Any] | list[dict[str, Any]]:
         """Выполняет HTTP-запрос к внешнему API."""
         async with httpx.AsyncClient(timeout=httpx.Timeout(self.timeout)) as client:
 
@@ -52,11 +55,13 @@ class FilmSupplier(BaseSupplier):
             )
             return response_data
 
-    def _convert_to_model(self, json: dict, model: type[FilmResponse]) -> list[FilmResponse]:
+    def _convert_to_model(
+        self, json: list[dict[str, Any]], model: type[FilmResponse]
+    ) -> list[FilmResponse]:
         """Преобразует JSON-ответ в список объектов модели."""
 
         adapter = TypeAdapter(list[FilmResponse])
-        return list(adapter.validate_python(json))
+        return adapter.validate_python(json)
 
 
 def get_film_supplier() -> FilmSupplier:

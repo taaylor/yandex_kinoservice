@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import Any
 
 import httpx
 from core.config import app_config
@@ -38,7 +39,7 @@ class NotificationAdapter(AbstractNotification):
         return await self._send(url, data)
 
     @handle_http_errors(service_name=app_config.notification_api.host)
-    async def _send(self, url: str, data: dict) -> str:
+    async def _send(self, url: str, data: dict[str, Any]) -> str:
         """Отправляет запрос в сервис нотификаций"""
         async with httpx.AsyncClient(
             timeout=httpx.Timeout(app_config.notification_api.timeout_sec)

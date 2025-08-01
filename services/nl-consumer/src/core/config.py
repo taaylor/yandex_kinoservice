@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import dotenv
 from core.logger_config import LoggerSettings
@@ -20,7 +21,7 @@ class LLM(BaseModel):
     def get_url(self) -> str:
         return f"{self.protocol}://{self.host}:{self.port}{self.path}"
 
-    resp_format: dict = {
+    resp_format: dict[str, Any] = {
         "type": "object",
         "properties": {
             "genre": {
