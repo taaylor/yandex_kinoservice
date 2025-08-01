@@ -2,6 +2,7 @@ import pytest_asyncio
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from tests.functional.core.config_log import get_logger
+from tests.functional.core.settings import test_conf
 from tests.functional.testdata.model_enum import PermissionEnum
 from tests.functional.testdata.model_orm import DictRoles, RolesPermissions, User, UserCred
 from tests.functional.testdata.schemes import LoginRequest
@@ -54,7 +55,9 @@ def create_user(pg_session: AsyncSession, make_post_request):
             "/sessions/login",
         )
 
-        body, _ = await make_post_request(uri=uri, data=login.model_dump(mode="json"))
+        body, _ = await make_post_request(
+            url=test_conf.authapi.host_service + uri, data=login.model_dump(mode="json")
+        )
 
         if not body:
             raise AssertionError(f"Endpoint {uri} вернул невалидный ответ")

@@ -84,6 +84,13 @@ class Mapping:
                     },
                 },
                 "writers_names": {"type": "text", "analyzer": "ru_en"},
+                "embedding": {
+                    "type": "dense_vector",
+                    "dims": 384,
+                    "index": True,
+                    "similarity": "cosine",
+                    "index_options": {"type": "hnsw", "m": 32, "ef_construction": 150},
+                },
             },
         },
     }
