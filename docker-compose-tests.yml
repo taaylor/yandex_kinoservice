@@ -325,6 +325,40 @@ services:
       - "9411:9411"       # порт совместимости с Zipkin
     restart: always
 
+  embedding-service:
+    platform: linux/amd64
+    container_name: embedding-service
+    profiles: ["embedding-service-test"]
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: services/embedding-service/src/Dockerfile
+    environment:
+      - HF_HUB_TIMEOUT=600
+    ports:
+      - ${TEST_RUN_PORTS}:${TEST_RUN_PORTS}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/embedding-service/openapi"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: "always"
+
+  tests-embedding-service:
+    build:
+      context: .
+      dockerfile: ./services/embedding-service/tests/functional/Dockerfile
+    profiles: ["embedding-service-test"]
+    container_name: tests-embedding-service-container
+    env_file:
+      - ./.env
+    depends_on:
+      embedding-service:
+        condition: service_healthy
+
+
 volumes:
   test_redis_data:
   test_elasticsearch_data:

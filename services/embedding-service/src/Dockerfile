@@ -19,6 +19,13 @@ COPY services/embedding-service/src/pyproject.toml services/embedding-service/sr
 RUN poetry install --only main
 
 FROM python:${PYTHON_VERSION}-slim
+
+# ! -=-=-=-=- моя секция -=-=-=-=-
+RUN apt-get update  \
+&& apt-get install -y curl \
+&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/apt
+# ! -=-=-=-=- моя секция -=-=-=-=-
+
 WORKDIR /opt/app
 
 COPY --from=builder /opt/app/.venv .venv

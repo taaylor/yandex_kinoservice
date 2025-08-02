@@ -85,6 +85,9 @@ jobs:
       - name: Start tests async-api
         run: make test-async-api-ci PYTHON_VERSION=${{ matrix.python-version }}
 
+      - name: Start tests embedding-service
+        run: make test-embedding-service-ci PYTHON_VERSION=${{ matrix.python-version }}
+
   notify-success:
     runs-on: ubuntu-latest
     needs: [test-lint, build-and-test] # Зависит от всех предыдущих задач
