@@ -143,3 +143,15 @@ up-metrics-service:
 
 down-metrics-service:
 	docker compose --profile production down -v clickhouse-node1 clickhouse-node2 clickhouse-node3 clickhouse-node4 init_clickhouse zookeeper kafka-0 kafka-1 kafka-2 kafka-init metric-api etl
+
+up-local-statistic:
+	cd services/statistic-service/src/ && uvicorn main:app --port 8009 --reload
+
+up-statistic-service:
+	docker compose --profile production up --build -d statistic-service clickhouse-node1 clickhouse-node2 clickhouse-node3 clickhouse-node4 init_clickhouse zookeeper
+
+up-async-static-service:
+	docker compose -f $(COMPOSE_FILE_DEBUG) --profile production up --build -d statistic-service clickhouse-node1 clickhouse-node2 clickhouse-node3 clickhouse-node4 init_clickhouse zookeeper async-api auth-api kibana pg-import nginx elasticsearch es-init
+
+vm-up-server:
+	sudo docker compose --profile production up -d --build kibana embedding-etl recs-profile nl-consumer nginx notification auth-api pg-import postgres recs-profile embedding-service content-actions-api kafka-init statistic-service

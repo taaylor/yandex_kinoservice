@@ -317,6 +317,32 @@ services:
         condition: service_completed_successfully
     restart: "always"
 
+  statistic-service:
+    container_name: statistic-service
+    build:
+      dockerfile: ./services/statistic-service/src/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      clickhouse-node1:
+        condition: service_healthy
+      clickhouse-node2:
+        condition: service_healthy
+      clickhouse-node3:
+        condition: service_healthy
+      clickhouse-node4:
+        condition: service_healthy
+      init_clickhouse:
+        condition: service_completed_successfully
+    ports:
+      - "8010:8000"
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:8000/statistic/openapi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
   nginx:
     container_name: nginx
     image: nginx:1.27.5-alpine

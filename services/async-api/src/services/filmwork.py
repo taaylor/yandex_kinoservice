@@ -13,9 +13,10 @@ from db.cache import Cache, get_cache
 from db.database import PaginateBaseDB
 from db.elastic import get_paginate_repository
 from fastapi import Depends, HTTPException, status
-from models.schemas_logic import FilmLogic
+from models.schemas_logic import FilmLogic, PeriodEnum
 from pydantic import TypeAdapter
 from suppliers.rec_profile import RecProfileSupplier, get_rec_profile_supplier
+from suppliers.statistic_supplier import StatisticSupplier, get_statistic_supplier
 from tracer_utils import traced
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 REDIS_KEY_FILMS = "films:"
 REDIS_KEY_REC_FILMS = "films:rec:{user_id}:{page_number}:{page_size}"
+REDIS_TRENDS_FILMS = "films:trends:{period}:{page_size}"
 REDIS_FILMS_CACHE_EXPIRES = app_config.cache_expire_in_seconds
 
 
@@ -347,14 +349,19 @@ class FilmRepository:
 class FilmService:
     """Класс, реализующий бизнес-логику работы с фильмами."""
 
-    __slots__ = ("cache", "repository", "rec_profile_supplier")
+    __slots__ = ("cache", "repository", "rec_profile_supplier", "statistic_supplier")
 
     def __init__(
-        self, cache: Cache, repository: FilmRepository, rec_profile_supplier: RecProfileSupplier
+        self,
+        cache: Cache,
+        repository: FilmRepository,
+        rec_profile_supplier: RecProfileSupplier,
+        statistic_supplier: StatisticSupplier,
     ):
         self.cache = cache
         self.repository = repository
         self.rec_profile_supplier = rec_profile_supplier
+        self.statistic_supplier = statistic_supplier
 
     async def get_film_by_id(
         self,
@@ -645,13 +652,45 @@ class FilmService:
             return films_dto
         return []
 
+    async def get_trends_films(self, period: PeriodEnum, page_size: int) -> list[FilmListResponse]:
+        type_adapter = TypeAdapter(list[FilmListResponse])
+        key_cache = REDIS_TRENDS_FILMS.format(period=period.value, page_size=page_size)
+        if trends_films_cache := await self.cache.get(key_cache):
+            logger.debug(f"По ключу {key_cache} найдены в кеше трендовые фильмы")
+            return type_adapter.validate_json(trends_films_cache)
+
+        trends_films_ids = await self.statistic_supplier.fetch_trends_films(
+            page_size=page_size, period=period
+        )
+        trends_films_db = await self.repository.get_list_film_by_ids(film_ids=trends_films_ids)
+
+        if trends_films_db:
+            logger.info(f"Получено {len(trends_films_db)} трендовых фильмов")
+            trends_films = [
+                FilmListResponse(
+                    uuid=film.id,
+                    title=film.title,
+                    imdb_rating=film.imdb_rating,
+                    type=film.type,
+                )
+                for film in trends_films_db
+            ]
+            await self.cache.background_set(
+                key=key_cache,
+                value=type_adapter.dump_json(trends_films),
+                expire=REDIS_FILMS_CACHE_EXPIRES,
+            )
+            return trends_films
+        return []
+
 
 @lru_cache
 def get_film_service(
     cache: Cache = Depends(get_cache),
     repository: PaginateBaseDB = Depends(get_paginate_repository),
     rec_profile_supplier: RecProfileSupplier = Depends(get_rec_profile_supplier),
+    statistic_supplier: StatisticSupplier = Depends(get_statistic_supplier),
 ) -> FilmService:
     """Получить экземпляр класса FilmService"""
     film_repository = FilmRepository(repository)
-    return FilmService(cache, film_repository, rec_profile_supplier)
+    return FilmService(cache, film_repository, rec_profile_supplier, statistic_supplier)

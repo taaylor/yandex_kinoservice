@@ -71,7 +71,7 @@ repos:
           - "--max-line-length=100"
           - "--extend-ignore=E203,W503,C812,C813,C814,C815S,C816,WPS300,WPS111,WPS431,WPS226,WPS110,WPS404,WPS601,WPS237,WPS202,WPS115,WPS201,WPS232,WPS432,WPS229"
           - "--select=WPS"
-        files: ^(services/content-actions-service/src|services/notification-service/src|services/ws_notification-service/src|services/nl-consumer/src|services/embedding-service/src|services/recs-profile/src)/
+        files: ^(services/content-actions-service/src|services/notification-service/src|services/ws_notification-service/src|services/nl-consumer/src|services/embedding-service/src|services/recs-profile/src|services/statistic-service/src)/
         exclude: >
           (?x)^(
               \.git/.*|
@@ -170,6 +170,20 @@ repos:
             "--explicit-package-bases",
           ]
         files: ^services/recs-profile/src/
+        additional_dependencies:
+          - mypy==1.13.0
+          - types-ujson
+      - id: mypy
+        name: mypy-statistic-service
+        args:
+          [
+            "--config-file=pyproject.toml",
+            "--no-implicit-reexport",
+            "--show-error-context",
+            "--verbose",
+            "--explicit-package-bases",
+          ]
+        files: ^services/statistic-service/src/
         additional_dependencies:
           - mypy==1.13.0
           - types-ujson

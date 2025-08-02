@@ -10,6 +10,11 @@ class FilmsType(StrEnum):
     ARCHIVED = "ARCHIVED"
 
 
+class PeriodEnum(StrEnum):
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+
+
 class PersonLogic(BaseModel):
     """Модель, для бизнес логики, представляющая человека (актера, сценариста, режиссера).
 

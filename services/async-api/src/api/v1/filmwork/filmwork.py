@@ -9,6 +9,7 @@ from api.v1.filmwork.schemas import (
 )
 from auth_utils import LibAuthJWT, Permissions, auth_dep
 from fastapi import APIRouter, Depends, Path, Query
+from models.schemas_logic import PeriodEnum
 from services.filmwork import FilmService, get_film_service
 
 router = APIRouter()
@@ -75,20 +76,26 @@ async def film_recommended(
     authorize: Annotated[LibAuthJWT, Depends(auth_dep)],
     page_size: Annotated[
         int,
-        Query(ge=1, le=100, description="Количество записей на странице"),
+        Query(ge=10, le=50, description="Количество записей на странице"),
     ] = 50,
     page_number: Annotated[int, Query(ge=1, description="Номер страницы")] = 1,
+    period: Annotated[
+        PeriodEnum, Query(description="Период за который получить рекомендации")
+    ] = PeriodEnum.WEEKLY,
 ) -> FilmRecResponse:
-
     obj_response = FilmRecResponse()
     await authorize.jwt_optional()
 
     if user_token := await authorize.get_raw_jwt():
+        # если пользователь авторизован получаем его рекомендации
         user_id = user_token.get("user_id")
         obj_response.film_recommended = await film_service.get_recommended_films(
             user_id=user_id, page_size=page_size, page_number=page_number
         )
-    # TODO: после того как реализую бизнес логику по трендовым фильмам снова расширю этот point
+    # получаем трендовые фильмы по периоду
+    obj_response.film_trend = await film_service.get_trends_films(
+        page_size=page_size, period=period
+    )
     return obj_response
 
 

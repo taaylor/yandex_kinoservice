@@ -23,7 +23,7 @@ jobs:
 
       - name: Test lint
         run: |
-          flake8 services/notification-service/src services/content-actions-service/src services/ws_notification-service/src services/nl-consumer/src services/embedding-service/src services/nl-consumer/src \
+          flake8 services/notification-service/src services/content-actions-service/src services/ws_notification-service/src services/nl-consumer/src services/embedding-service/src services/nl-consumer/src service/statistic-service/src \
           --max-line-length=100 \
           --extend-ignore=E203,W503,C812,C813,C814,C815S,C816,WPS300,WPS111,WPS431,WPS226,WPS110,WPS404,WPS601,WPS237,WPS202,WPS115,WPS201,WPS232,WPS432,WPS229 \
           --select=WPS \
@@ -36,6 +36,7 @@ jobs:
           mypy services/nl-consumer/src --config-file=pyproject.toml --no-implicit-reexport --explicit-package-bases
           mypy services/embedding-service/src --config-file=pyproject.toml --no-implicit-reexport --explicit-package-bases
           mypy services/recs-profile/src --config-file=pyproject.toml --no-implicit-reexport --explicit-package-bases
+          mypy services/statistic-service/src --config-file=pyproject.toml --no-implicit-reexport --explicit-package-bases
 
       - name: Upload flake8 report # выгружает отчеты по flake8
         if: always()

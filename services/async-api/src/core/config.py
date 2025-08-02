@@ -41,6 +41,16 @@ class RecProfileSupplier(BaseModel):
         return f"http://{self.host}:{self.port}/recs-profile/api/v1/recs/fetch-user-recs"
 
 
+class StatisticSupplier(BaseModel):
+    host: str = "localhost"
+    port: int = 8010
+    timeout: int = 30
+
+    @property
+    def get_url(self) -> str:
+        return f"http://{self.host}:{self.port}/statistic/api/v1/trends/fetch-trends-films"
+
+
 class AppConfig(BaseSettings):
     project_name: str = "async-service"
     docs_url: str = "/async/openapi"
@@ -53,6 +63,7 @@ class AppConfig(BaseSettings):
     redis: Redis = Redis()
     server: Server = Server()
     rec_profile_supplier: RecProfileSupplier = RecProfileSupplier()
+    statistic_supplier: StatisticSupplier = StatisticSupplier()
 
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
